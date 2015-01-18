@@ -26,8 +26,7 @@ def get_polls():
     """
     context = {}
     for party, url in POLLS.items():
-        r = requests.get(url)
-        context[party] = r.json()
+        context[party] = requests.get(url).json()
 
     return context
 

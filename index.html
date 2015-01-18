@@ -12,6 +12,8 @@
 
 .candidate {
     border: 1px solid #777;
+    overflow: hidden;
+    padding: 5px;
     position: absolute;
 }
 </style>
@@ -58,8 +60,7 @@ var margin = {top: 10, right: 10, bottom: 10, left: 10}
   , height = width * .75 - margin.top - margin.bottom;
 
 var treemap = d3.layout.treemap()
-    .size([width, height])
-    //.sort(d3.descending);
+    .size([width, height]);
 
 var chart = d3.selectAll('.chart')
     .style('height', (height + margin.top + margin.bottom) + 'px')
@@ -74,6 +75,20 @@ var candidates = chart.selectAll('.candidate')
     .attr('class', 'candidate')
     .call(position)
     .text(function(d) { return d.children ? null : d.choice; })
+
+d3.select(window).on('resize', function() {
+    // check width again
+    var width = parseInt(d3.select('.chart').style('width'), 10)
+      , width = width - margin.left - margin.right
+      , height = width * .75 - margin.top - margin.bottom;
+
+    // reset size
+    chart.style('height', (height + margin.top + margin.bottom) + 'px')
+    treemap.size([width, height]);
+
+    // redo layout
+    candidates.data(treemap).call(position);
+})
 
 function position(selection) {
     selection

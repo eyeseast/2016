@@ -3,12 +3,33 @@
 """
 Tarbell project configuration
 """
+import requests
+from flask import Blueprint, g
+
+blueprint = Blueprint('election', __name__)
 
 # Google spreadsheet key
 #SPREADSHEET_KEY = "None"
 
 # Exclude these files from publication
 EXCLUDES = ["*.md", "requirements.txt"]
+
+POLLS = {
+    'GOP': 'http://elections.huffingtonpost.com/pollster/api/charts/2016-national-gop-primary',
+    'DEM': 'http://elections.huffingtonpost.com/pollster/api/charts/2016-national-democratic-primary'
+}
+
+@blueprint.app_context_processor
+def get_polls():
+    """
+    Add polls to context
+    """
+    context = {}
+    for party, url in POLLS.items():
+        r = requests.get(url)
+        context[party] = r.json()
+
+    return context
 
 # Spreadsheet cache lifetime in seconds. (Default: 4)
 # SPREADSHEET_CACHE_TTL = 4
@@ -33,23 +54,12 @@ S3_BUCKETS = {
     #     "mytarget": "mys3url.bucket.url/some/path"
     # then use tarbell publish mytarget to publish to it
     
-    "production": "apps.frontline.org/2016",
-    "staging": "frontline-apps/2016",
+    #"production": "",
+    #"staging": "",
 }
 
 # Default template variables
 DEFAULT_CONTEXT = {
-    'data': [   {   'column1': u'row1, column1',
-                    'column2': u'row1, column2'},
-                {   'column1': u'row2, column1',
-                    'column2': u'row2, column2'}],
-    'headline': u'Test headline',
-    'keyed_data': {   'key1': {   'column1': u'key1, column1',
-                                  'column2': u'key1, column2',
-                                  'key': u'key1'},
-                      'key2': {   'column1': u'key2, column1',
-                                  'column2': u'key2, column2',
-                                  'key': u'key2'}},
-    'name': '2016',
+    'POLLS': POLLS,
     'title': '2016'
 }
